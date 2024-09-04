@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
       </View>
       <TouchableOpacity
         style={$buttonStyle}
-        onPress={() => router.push("/(routes)/onboarding")}
+        onPress={() => router.push("/onboarding")}
       >
         <Text style={$buttonText}>Getting Started</Text>
       </TouchableOpacity>

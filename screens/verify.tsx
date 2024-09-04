@@ -10,8 +10,12 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { router } from "expo-router";
+import { useLoginStore } from "@/stores/login";
+import api from "@/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function VerifyScreen() {
+  const { userInfo, setUserInfo } = useLoginStore();
   const [code, setCode] = useState(new Array(4).fill(""));
 
   const inputs = useRef<any>([...Array(4)].map(() => React.createRef()));
@@ -32,6 +36,16 @@ export default function VerifyScreen() {
 
   const handleSumbit = async () => {
     const otp = code.join("");
+    const res = await api.post("/auth/verify", {
+      email: userInfo.email,
+      otp: otp,
+    });
+    if (res.ok) {
+      router.push("/(tabs)/home");
+
+      // await AsyncStorage.setItem("access_token", res.data?.accessToken);
+      // await AsyncStorage.setItem("refresh_token", res.data?.refreshToken);
+    }
   };
 
   return (
@@ -65,8 +79,13 @@ export default function VerifyScreen() {
       </View>
       <View style={$loginLink}>
         <Text style={$backText}>Back To?</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={$loginText}>Sign In</Text>
+        <TouchableOpacity
+          onPress={() => {
+            router.back();
+            setUserInfo({ ...userInfo, email: "" });
+          }}
+        >
+          <Text style={$loginText}>Login</Text>
         </TouchableOpacity>
       </View>
     </View>

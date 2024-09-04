@@ -9,63 +9,23 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import {
-  Entypo,
-  Fontisto,
-  Ionicons,
-  SimpleLineIcons,
-} from "@expo/vector-icons";
+import { Entypo, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
 import api from "@/api";
 import { useLoginStore } from "@/stores/login";
 import { observer } from "mobx-react-lite";
 
 function LoginScreen() {
-  const {
-    isPasswordVisible,
-    setPasswordVisible,
-    userInfo,
-    setUserInfo,
-    error,
-    setError,
-  } = useLoginStore();
-
-  const handlePasswordValidation = (value: string) => {
-    const password = value;
-    const passwordSpecialCharacter = /(?=.*[!@#$&*])/;
-    const passwordOneNumber = /(?=.*[0-9])/;
-    const passwordSixValue = /(?=.{6,})/;
-
-    if (!passwordSpecialCharacter.test(password)) {
-      setError("Write at least one special character");
-      setUserInfo({ ...userInfo, password: "" });
-    } else if (!passwordOneNumber.test(password)) {
-      setError("Write at least one number");
-      setUserInfo({ ...userInfo, password: "" });
-    } else if (!passwordSixValue.test(password)) {
-      setError("Write at least 6 characters");
-      setUserInfo({ ...userInfo, password: "" });
-    } else {
-      setError("");
-      setUserInfo({ ...userInfo, password: value });
-    }
-  };
+  const { userInfo, setUserInfo, error, setError } = useLoginStore();
 
   const handleSignIn = async () => {
-    router.push("/(tabs)");
-    // await api
-    //   .post("/login", {
-    //     email: userInfo.email,
-    //     password: userInfo.password,
-    //   })
-    //   .then(async (res) => {
-    //     // await AsyncStorage.setItem("access_token", res?.data?.accessToken);
-    //     // await AsyncStorage.setItem("refresh_token", res?.data?.refreshToken);
-    //     router.push("/(tabs)");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
+    const res = await api.post("/auth/login", {
+      email: userInfo.email,
+    });
+    if (res.ok) {
+      router.push("/verify");
+    }
+
   };
 
   return (
@@ -94,36 +54,7 @@ function LoginScreen() {
               size={20}
               color={"#A1A1A1"}
             />
-            <View style={{ marginTop: 15 }}>
-              <TextInput
-                style={$input}
-                keyboardType="default"
-                secureTextEntry={!isPasswordVisible}
-                defaultValue=""
-                placeholder="********"
-                onChangeText={handlePasswordValidation}
-              />
-              <TouchableOpacity
-                style={$visibleIcon}
-                onPress={() => setPasswordVisible(!isPasswordVisible)}
-              >
-                {isPasswordVisible ? (
-                  <Ionicons
-                    name="eye-off-outline"
-                    size={23}
-                    color={"#747474"}
-                  />
-                ) : (
-                  <Ionicons name="eye-outline" size={23} color={"#747474"} />
-                )}
-              </TouchableOpacity>
-              <SimpleLineIcons
-                style={$icon2}
-                name="lock"
-                size={20}
-                color={"#A1A1A1"}
-              />
-            </View>
+
             {error && (
               <View style={$errorContainer}>
                 <Entypo name="cross" size={18} color={"red"} />
@@ -132,11 +63,6 @@ function LoginScreen() {
                 </Text>
               </View>
             )}
-            <TouchableOpacity
-              onPress={() => router.push("/(routes)/forgot-password")}
-            >
-              <Text style={$forgotSection}>Forgot Password?</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity
               style={{
@@ -159,15 +85,6 @@ function LoginScreen() {
                 Sign In
               </Text>
             </TouchableOpacity>
-
-            <View style={$redirect}>
-              <Text style={{ fontSize: 18, fontFamily: "spaceGroteskBold" }}>
-                Don't have an account?
-              </Text>
-              <TouchableOpacity onPress={() => router.push("/(routes)/signup")}>
-                <Text style={$redirectText}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </ScrollView>
